@@ -11,30 +11,34 @@ private:
 	sf::Texture bullettexture;
 	bool alive;
 public:
-	Bullet(int i, float speed) {
+	Bullet() {
 		alive = false;
 		bullettexture.loadFromFile("bullet.png");
 		bulletsprite.setTexture(bullettexture);
-		bulletsprite.setScale(0.05, 0.05);
+		bulletsprite.setScale(0.35, 0.35);
 	}
-	void setlocation(float x, float y)
-	{
+	void setlocation(float x, float y){
 		bulletsprite.setPosition(x, y);
 	}
-	sf::Sprite getsprite()
-	{
+	void movedown() {
+		bulletsprite.move(0, 1);
+	}
+	void moveup() {
+		bulletsprite.move(0, -1);
+	}
+	sf::Sprite getsprite(){
 		return bulletsprite;
 	}
-	void kill()
-	{
+	void draw(sf::RenderWindow& win) {
+		win.draw(bulletsprite);
+	}
+	void kill(){
 		alive = false;
 	}
-
-	bool isalive()
-	{
+	bool getalive(){
 		return alive;
 	}
-	void idk(bool tf) {
+	void isalive(bool tf) {
 		alive = tf;
 	}
 };
@@ -44,19 +48,9 @@ private:
 	sf::Texture enemytexture;
 	sf::Sprite enemysprite;
 	bool alive;
-	int x1, x2, y1, y2,fx;
 public:
-	Enemy(){
-		alive = true;
-		//enemytexture.loadFromFile("ship.png");
-		//enemysprite.setTexture(enemytexture);
-		//enemysprite.setScale(0.05, 0.05);
-	}
 	Enemy(int x, int y) {
 		alive = true;
-		x1 = x;
-		fx = x;
-		y1 = y;
 		enemytexture.loadFromFile("enemy.png");
 		enemysprite.setTexture(enemytexture);
 		enemysprite.setPosition(x, y);
@@ -82,14 +76,13 @@ public:
 	sf::Sprite getsprite() {
 		return enemysprite;
 	}
-	bool isalive(){
+	bool isalive() {
 		return alive;
 	}
 	void kill() {
 		alive = false;
 	}
-	void setlocation(float x, float y)
-	{
+	void setlocation(float x, float y) {
 		enemysprite.setPosition(x, y);
 	}
 	void draw(sf::RenderWindow& win) {
@@ -106,47 +99,38 @@ private:
 	int y;
 	bool alive;
 public:
-	Ship(){
+	Ship() {
 		alive = true;
 		shiptexture.loadFromFile("ship.png");
 		shipsprite.setTexture(shiptexture);
 		shipsprite.setScale(0.17, 0.17);
 	}
-	void setlocation(float x, float y)
-	{
+	void setlocation(float x, float y) {
 		shipsprite.setPosition(x, y);
-		x = shipsprite.getPosition().x;
-		y = shipsprite.getPosition().y;
 	}
 
 	void move()
 	{
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)) {
 			if (shipsprite.getPosition().x <=713) {
-				shipsprite.move(4, 0);	
+				shipsprite.move(1, 0);	
 			}
 		}
 			
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) {
 			if (shipsprite.getPosition().x > 0) {
-				shipsprite.move(-4, 0);
+				shipsprite.move(-1, 0);
 			}
 		}
 		x = shipsprite.getPosition().x;
 	}
-
-	sf::Sprite getsprite()
-	{
+	sf::Sprite getsprite() {
 		return shipsprite;
 	}
-
-	void kill()
-	{
+	void kill() {
 		alive = false;
 	}
-
-	bool isalive()
-	{
+	bool isalive() {
 		return alive;
 	}
 };
@@ -178,6 +162,25 @@ int main()
 	Enemy enemy6 = Enemy(200, 250);
 	Enemy enemy7 = Enemy(600, 250);
 
+	//Bullets
+	Bullet bullet0;
+	Bullet bullet1;
+	Bullet bullet2;
+	Bullet bullet3;
+	Bullet bullet4;
+	Bullet bullet5;
+	Bullet bullet6;
+	Bullet bullet7;
+
+	bullet0.setlocation(enemy0.getsprite().getPosition().x, enemy0.getsprite().getPosition().y + 12);
+	bullet1.setlocation(enemy1.getsprite().getPosition().x, enemy1.getsprite().getPosition().y + 12);
+	bullet2.setlocation(enemy2.getsprite().getPosition().x, enemy2.getsprite().getPosition().y + 12);
+	bullet3.setlocation(enemy3.getsprite().getPosition().x, enemy3.getsprite().getPosition().y + 12);
+	bullet4.setlocation(enemy4.getsprite().getPosition().x, enemy4.getsprite().getPosition().y + 12);
+	bullet5.setlocation(enemy5.getsprite().getPosition().x, enemy5.getsprite().getPosition().y + 12);
+	bullet6.setlocation(enemy6.getsprite().getPosition().x, enemy6.getsprite().getPosition().y + 12);
+	bullet7.setlocation(enemy7.getsprite().getPosition().x, enemy7.getsprite().getPosition().y + 12);
+
 	while (window.isOpen())
 	{
 		sf::Event event;
@@ -198,6 +201,14 @@ int main()
 		enemy5.draw(window);
 		enemy6.draw(window);
 		enemy7.draw(window);
+		bullet0.draw(window);
+		bullet1.draw(window);
+		bullet2.draw(window);
+		bullet3.draw(window);
+		bullet4.draw(window);
+		bullet5.draw(window);
+		bullet6.draw(window);
+		bullet7.draw(window);
 
 		
 		//Movement
@@ -212,11 +223,51 @@ int main()
 		enemy6.leftright(0, 450);
 		enemy7.leftright(450, 800);
 
-		//if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space))
-		{
-			//bullet.idk(true);
-			//bullet.setlocation(ship.getsprite().getPosition().x + 31, ship.getsprite().getPosition().y - 15);
+		if (bullet0.getsprite().getPosition().y > 700){
+			bullet0.setlocation(enemy0.getsprite().getPosition().x, enemy0.getsprite().getPosition().y + 12);
 		}
+		if (bullet1.getsprite().getPosition().y > 700) {
+			bullet1.setlocation(enemy1.getsprite().getPosition().x, enemy1.getsprite().getPosition().y + 12);
+		}
+		if (bullet2.getsprite().getPosition().y > 700) {
+			bullet2.setlocation(enemy2.getsprite().getPosition().x, enemy2.getsprite().getPosition().y + 12);
+		}
+		if (bullet3.getsprite().getPosition().y > 700) {
+			bullet3.setlocation(enemy3.getsprite().getPosition().x, enemy3.getsprite().getPosition().y + 12);
+		}
+		if (bullet4.getsprite().getPosition().y > 700) {
+			bullet4.setlocation(enemy4.getsprite().getPosition().x, enemy4.getsprite().getPosition().y + 12);
+		}
+		if (bullet5.getsprite().getPosition().y > 700) {
+			bullet5.setlocation(enemy5.getsprite().getPosition().x, enemy5.getsprite().getPosition().y + 12);
+		}
+		if (bullet6.getsprite().getPosition().y > 700) {
+			bullet6.setlocation(enemy6.getsprite().getPosition().x, enemy6.getsprite().getPosition().y + 12);
+		}
+		if (bullet7.getsprite().getPosition().y > 700) {
+			bullet7.setlocation(enemy7.getsprite().getPosition().x, enemy7.getsprite().getPosition().y + 12);
+		}
+
+		bullet0.movedown();
+		bullet1.movedown();
+		bullet2.movedown();
+		bullet3.movedown();
+		bullet4.movedown();
+		bullet5.movedown();
+		bullet6.movedown();
+		bullet7.movedown();
+
+		//Shooting
+		Bullet bullet;
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) {
+			bullet.isalive(true);
+		}
+		if (bullet.getalive()) {
+			bullet.setlocation(ship.getsprite().getPosition().x + 7, ship.getsprite().getPosition().y - 65);
+			bullet.draw(window);
+			bullet.moveup();
+		}
+
 		window.display();
 	}
 	return 0;
