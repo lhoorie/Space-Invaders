@@ -2,17 +2,21 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 #include <string>
+#include <vector>
 
 using namespace std;
 
 class Bullet {
 private:
-	sf::Sprite bulletsprite;
-	sf::Texture bullettexture;
+	
 	bool alive;
 public:
+	sf::Sprite bulletsprite;
+	sf::Texture bullettexture;
+	bool isActive;
 	Bullet() {
 		alive = false;
+		isActive = true;
 		bullettexture.loadFromFile("bullet.png");
 		bulletsprite.setTexture(bullettexture);
 		bulletsprite.setScale(0.35, 0.35);
@@ -30,7 +34,10 @@ public:
 		return bulletsprite;
 	}
 	void draw(sf::RenderWindow& win) {
-		win.draw(bulletsprite);
+		if (isActive) {
+			win.draw(bulletsprite);
+		}
+		
 	}
 	void kill(){
 		alive = false;
@@ -40,6 +47,12 @@ public:
 	}
 	void isalive(bool tf) {
 		alive = tf;
+	}
+
+	void setTexture() {
+		bullettexture.loadFromFile("bullet.png");
+		bulletsprite.setTexture(bullettexture);
+		bulletsprite.setScale(0.35, 0.35);
 	}
 };
 
@@ -86,9 +99,23 @@ public:
 		enemysprite.setPosition(x, y);
 	}
 	void draw(sf::RenderWindow& win) {
-		win.draw(enemysprite);
+		if (alive) {
+			win.draw(enemysprite);
+		}
 	}
-
+	void Collision(std::vector<Bullet> Bullets, int* Score) {
+		for (int i = 0; i < Bullets.size(); i++) {
+			if ((enemysprite.getPosition().x < (Bullets.at(i).bulletsprite.getPosition().x + 3)) && (enemysprite.getPosition().x + 60 > Bullets.at(i).bulletsprite.getPosition().x)) {
+				if ((enemysprite.getPosition().y < Bullets.at(i).bulletsprite.getPosition().y +3) && (enemysprite.getPosition().y + 548 > Bullets.at(i).bulletsprite.getPosition().y)) {
+					if (Bullets.at(i).isActive && alive) {
+						Bullets.at(i).isActive = false;
+						alive = false;
+						*Score = (*Score) - 1;
+					}
+				}
+			}
+		}
+	}
 };
 
 class Ship {
@@ -139,6 +166,7 @@ int main()
 {
 	bool gameover = false;
 	bool win = false;
+	vector <Bullet> Bullets;
 
 	sf::RenderWindow window(sf::VideoMode(800, 600), "Space Invaders!");
 
@@ -163,6 +191,7 @@ int main()
 	Enemy enemy7 = Enemy(600, 250);
 
 	//Bullets
+	Bullet bullet;
 	Bullet bullet0;
 	Bullet bullet1;
 	Bullet bullet2;
@@ -180,7 +209,7 @@ int main()
 	bullet5.setlocation(enemy5.getsprite().getPosition().x, enemy5.getsprite().getPosition().y + 12);
 	bullet6.setlocation(enemy6.getsprite().getPosition().x, enemy6.getsprite().getPosition().y + 12);
 	bullet7.setlocation(enemy7.getsprite().getPosition().x, enemy7.getsprite().getPosition().y + 12);
-
+	int Score = 8;
 	while (window.isOpen())
 	{
 		sf::Event event;
@@ -189,6 +218,15 @@ int main()
 			if (event.type == sf::Event::Closed)
 				window.close();
 		}
+
+		enemy0.Collision(Bullets, &Score);
+		enemy1.Collision(Bullets, &Score);
+		enemy2.Collision(Bullets, &Score);
+		enemy3.Collision(Bullets, &Score);
+		enemy4.Collision(Bullets, &Score);
+		enemy5.Collision(Bullets, &Score);
+		enemy6.Collision(Bullets, &Score);
+		enemy7.Collision(Bullets, &Score);
 
 		//Draw
 		window.draw(backsprite);
@@ -223,28 +261,28 @@ int main()
 		enemy6.leftright(0, 450);
 		enemy7.leftright(450, 800);
 
-		if (bullet0.getsprite().getPosition().y > 700){
+		if (bullet0.getsprite().getPosition().y > 1000){
 			bullet0.setlocation(enemy0.getsprite().getPosition().x, enemy0.getsprite().getPosition().y + 12);
 		}
-		if (bullet1.getsprite().getPosition().y > 700) {
+		if (bullet1.getsprite().getPosition().y > 1000) {
 			bullet1.setlocation(enemy1.getsprite().getPosition().x, enemy1.getsprite().getPosition().y + 12);
 		}
-		if (bullet2.getsprite().getPosition().y > 700) {
+		if (bullet2.getsprite().getPosition().y > 1000) {
 			bullet2.setlocation(enemy2.getsprite().getPosition().x, enemy2.getsprite().getPosition().y + 12);
 		}
-		if (bullet3.getsprite().getPosition().y > 700) {
+		if (bullet3.getsprite().getPosition().y > 1000) {
 			bullet3.setlocation(enemy3.getsprite().getPosition().x, enemy3.getsprite().getPosition().y + 12);
 		}
-		if (bullet4.getsprite().getPosition().y > 700) {
+		if (bullet4.getsprite().getPosition().y >1000) {
 			bullet4.setlocation(enemy4.getsprite().getPosition().x, enemy4.getsprite().getPosition().y + 12);
 		}
-		if (bullet5.getsprite().getPosition().y > 700) {
+		if (bullet5.getsprite().getPosition().y > 1000) {
 			bullet5.setlocation(enemy5.getsprite().getPosition().x, enemy5.getsprite().getPosition().y + 12);
 		}
-		if (bullet6.getsprite().getPosition().y > 700) {
+		if (bullet6.getsprite().getPosition().y > 1000) {
 			bullet6.setlocation(enemy6.getsprite().getPosition().x, enemy6.getsprite().getPosition().y + 12);
 		}
-		if (bullet7.getsprite().getPosition().y > 700) {
+		if (bullet7.getsprite().getPosition().y > 1000) {
 			bullet7.setlocation(enemy7.getsprite().getPosition().x, enemy7.getsprite().getPosition().y + 12);
 		}
 
@@ -258,15 +296,25 @@ int main()
 		bullet7.movedown();
 
 		//Shooting
-		Bullet bullet;
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) {
-			bullet.isalive(true);
+			Bullet newBullet = Bullet();
+			newBullet.setlocation(ship.getsprite().getPosition().x + 7, ship.getsprite().getPosition().y - 65);
+			Bullets.push_back(newBullet);
 		}
+		
+		for (int i = 0; i < Bullets.size(); i++) {
+			Bullets.at(i).setTexture();
+			Bullets.at(i).moveup();
+			Bullets.at(i).draw(window);
+		}
+
 		if (bullet.getalive()) {
 			bullet.setlocation(ship.getsprite().getPosition().x + 7, ship.getsprite().getPosition().y - 65);
 			bullet.draw(window);
 			bullet.moveup();
 		}
+
+		//Collision
 
 		window.display();
 	}
