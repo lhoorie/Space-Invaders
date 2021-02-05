@@ -1,4 +1,5 @@
 #include <iostream>
+#include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 #include <string>
@@ -8,7 +9,6 @@ using namespace std;
 
 class Bullet {
 private:
-	
 	bool alive;
 public:
 	sf::Sprite bulletsprite;
@@ -19,7 +19,7 @@ public:
 		isActive = true;
 		bullettexture.loadFromFile("bullet.png");
 		bulletsprite.setTexture(bullettexture);
-		bulletsprite.setScale(0.35, 0.35);
+		bulletsprite.setScale(0.5, 0.5);
 	}
 	void setlocation(float x, float y){
 		bulletsprite.setPosition(x, y);
@@ -40,19 +40,12 @@ public:
 		
 	}
 	void kill(){
-		alive = false;
+		isActive = false;
 	}
-	bool getalive(){
-		return alive;
-	}
-	void isalive(bool tf) {
-		alive = tf;
-	}
-
 	void setTexture() {
 		bullettexture.loadFromFile("bullet.png");
 		bulletsprite.setTexture(bullettexture);
-		bulletsprite.setScale(0.35, 0.35);
+		bulletsprite.setScale(0.5, 0.5);
 	}
 };
 
@@ -89,11 +82,11 @@ public:
 	sf::Sprite getsprite() {
 		return enemysprite;
 	}
-	bool isalive() {
-		return alive;
-	}
 	void kill() {
 		alive = false;
+	}
+	bool isalive() {
+		return alive;
 	}
 	void setlocation(float x, float y) {
 		enemysprite.setPosition(x, y);
@@ -105,8 +98,8 @@ public:
 	}
 	void Collision(std::vector<Bullet> Bullets, int* Score) {
 		for (int i = 0; i < Bullets.size(); i++) {
-			if ((enemysprite.getPosition().x < (Bullets.at(i).bulletsprite.getPosition().x + 3)) && (enemysprite.getPosition().x + 60 > Bullets.at(i).bulletsprite.getPosition().x)) {
-				if ((enemysprite.getPosition().y < Bullets.at(i).bulletsprite.getPosition().y +3) && (enemysprite.getPosition().y + 548 > Bullets.at(i).bulletsprite.getPosition().y)) {
+			if ((enemysprite.getPosition().x < Bullets.at(i).bulletsprite.getPosition().x + 3) && (enemysprite.getPosition().x + 60 > Bullets.at(i).bulletsprite.getPosition().x)) {
+				if ((enemysprite.getPosition().y < Bullets.at(i).bulletsprite.getPosition().y +3) && (enemysprite.getPosition().y + 48 > Bullets.at(i).bulletsprite.getPosition().y)) {
 					if (Bullets.at(i).isActive && alive) {
 						Bullets.at(i).isActive = false;
 						alive = false;
@@ -135,7 +128,9 @@ public:
 	void setlocation(float x, float y) {
 		shipsprite.setPosition(x, y);
 	}
-
+	void kill() {
+		alive = false;
+	}
 	void move()
 	{
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)) {
@@ -154,21 +149,37 @@ public:
 	sf::Sprite getsprite() {
 		return shipsprite;
 	}
-	void kill() {
-		alive = false;
-	}
 	bool isalive() {
 		return alive;
+	}
+	void draw(sf::RenderWindow& win) {
+		if (alive) {
+			win.draw(shipsprite);
+		}
+	}
+	void Collision(Bullet bullet, int* Save) {
+		if ((shipsprite.getPosition().x + 43 > bullet.bulletsprite.getPosition().x ) && (shipsprite.getPosition().x - 43 < bullet.bulletsprite.getPosition().x)) {
+			if ((shipsprite.getPosition().y > bullet.bulletsprite.getPosition().y +10 ) && (shipsprite.getPosition().y < (bullet.bulletsprite.getPosition().y +30 ))) {
+				*Save = (*Save) - 1;
+			}
+		}
 	}
 };
 
 int main()
 {
-	bool gameover = false;
-	bool win = false;
 	vector <Bullet> Bullets;
 
 	sf::RenderWindow window(sf::VideoMode(800, 600), "Space Invaders!");
+
+	//Audio
+	sf::Music background;
+	background.openFromFile("background.wav");
+	sf::Music enemyvoice;
+	enemyvoice.openFromFile("enemy.wav");
+	sf::Music shipgun;
+	shipgun.openFromFile("shipgun.wav");
+
 
 	//Background
 	sf::Texture backtexture;
@@ -201,24 +212,30 @@ int main()
 	Bullet bullet6;
 	Bullet bullet7;
 
-	bullet0.setlocation(enemy0.getsprite().getPosition().x, enemy0.getsprite().getPosition().y + 12);
-	bullet1.setlocation(enemy1.getsprite().getPosition().x, enemy1.getsprite().getPosition().y + 12);
-	bullet2.setlocation(enemy2.getsprite().getPosition().x, enemy2.getsprite().getPosition().y + 12);
-	bullet3.setlocation(enemy3.getsprite().getPosition().x, enemy3.getsprite().getPosition().y + 12);
-	bullet4.setlocation(enemy4.getsprite().getPosition().x, enemy4.getsprite().getPosition().y + 12);
-	bullet5.setlocation(enemy5.getsprite().getPosition().x, enemy5.getsprite().getPosition().y + 12);
-	bullet6.setlocation(enemy6.getsprite().getPosition().x, enemy6.getsprite().getPosition().y + 12);
-	bullet7.setlocation(enemy7.getsprite().getPosition().x, enemy7.getsprite().getPosition().y + 12);
+	bullet0.setlocation(enemy0.getsprite().getPosition().x +30, enemy0.getsprite().getPosition().y + 30);
+	bullet1.setlocation(enemy1.getsprite().getPosition().x +30, enemy1.getsprite().getPosition().y + 30);
+	bullet2.setlocation(enemy2.getsprite().getPosition().x +30, enemy2.getsprite().getPosition().y + 30);
+	bullet3.setlocation(enemy3.getsprite().getPosition().x +30, enemy3.getsprite().getPosition().y + 30);
+	bullet4.setlocation(enemy4.getsprite().getPosition().x +30, enemy4.getsprite().getPosition().y + 30);
+	bullet5.setlocation(enemy5.getsprite().getPosition().x +30, enemy5.getsprite().getPosition().y + 30);
+	bullet6.setlocation(enemy6.getsprite().getPosition().x +30, enemy6.getsprite().getPosition().y + 30);
+	bullet7.setlocation(enemy7.getsprite().getPosition().x +30, enemy7.getsprite().getPosition().y + 30);
+
 	int Score = 8;
+	int Save = 3;
+	
 	while (window.isOpen())
 	{
 		sf::Event event;
 		while (window.pollEvent(event))
 		{
-			if (event.type == sf::Event::Closed)
+			if (event.type == sf::Event::Closed )
 				window.close();
 		}
 
+		background.play();
+
+		//Collision
 		enemy0.Collision(Bullets, &Score);
 		enemy1.Collision(Bullets, &Score);
 		enemy2.Collision(Bullets, &Score);
@@ -228,9 +245,18 @@ int main()
 		enemy6.Collision(Bullets, &Score);
 		enemy7.Collision(Bullets, &Score);
 
+		ship.Collision(bullet0, &Save);
+		ship.Collision(bullet1, &Save);
+		ship.Collision(bullet2, &Save);
+		ship.Collision(bullet3, &Save);
+		ship.Collision(bullet4, &Save);
+		ship.Collision(bullet5, &Save);
+		ship.Collision(bullet6, &Save);
+		ship.Collision(bullet7, &Save);
+
 		//Draw
 		window.draw(backsprite);
-		window.draw(ship.getsprite());
+		ship.draw(window);
 		enemy0.draw(window);
 		enemy1.draw(window);
 		enemy2.draw(window);
@@ -261,29 +287,29 @@ int main()
 		enemy6.leftright(0, 450);
 		enemy7.leftright(450, 800);
 
-		if (bullet0.getsprite().getPosition().y > 1000){
-			bullet0.setlocation(enemy0.getsprite().getPosition().x, enemy0.getsprite().getPosition().y + 12);
+		if (bullet0.getsprite().getPosition().y > 1000 && enemy0.isalive()){
+			bullet0.setlocation(enemy0.getsprite().getPosition().x +30 , enemy0.getsprite().getPosition().y + 30);
 		}
-		if (bullet1.getsprite().getPosition().y > 1000) {
-			bullet1.setlocation(enemy1.getsprite().getPosition().x, enemy1.getsprite().getPosition().y + 12);
+		if (bullet1.getsprite().getPosition().y > 1000 && enemy1.isalive()) {
+			bullet1.setlocation(enemy1.getsprite().getPosition().x +30 , enemy1.getsprite().getPosition().y + 30);
 		}
-		if (bullet2.getsprite().getPosition().y > 1000) {
-			bullet2.setlocation(enemy2.getsprite().getPosition().x, enemy2.getsprite().getPosition().y + 12);
+		if (bullet2.getsprite().getPosition().y > 1000 && enemy2.isalive()) {
+			bullet2.setlocation(enemy2.getsprite().getPosition().x +30, enemy2.getsprite().getPosition().y + 30);
 		}
-		if (bullet3.getsprite().getPosition().y > 1000) {
-			bullet3.setlocation(enemy3.getsprite().getPosition().x, enemy3.getsprite().getPosition().y + 12);
+		if (bullet3.getsprite().getPosition().y > 1000 && enemy3.isalive()) {
+			bullet3.setlocation(enemy3.getsprite().getPosition().x +30, enemy3.getsprite().getPosition().y +30);
 		}
-		if (bullet4.getsprite().getPosition().y >1000) {
-			bullet4.setlocation(enemy4.getsprite().getPosition().x, enemy4.getsprite().getPosition().y + 12);
+		if (bullet4.getsprite().getPosition().y >1000 && enemy4.isalive()) {
+			bullet4.setlocation(enemy4.getsprite().getPosition().x +30, enemy4.getsprite().getPosition().y +30);
 		}
-		if (bullet5.getsprite().getPosition().y > 1000) {
-			bullet5.setlocation(enemy5.getsprite().getPosition().x, enemy5.getsprite().getPosition().y + 12);
+		if (bullet5.getsprite().getPosition().y > 1000 && enemy5.isalive()) {
+			bullet5.setlocation(enemy5.getsprite().getPosition().x +30, enemy5.getsprite().getPosition().y +30);
 		}
-		if (bullet6.getsprite().getPosition().y > 1000) {
-			bullet6.setlocation(enemy6.getsprite().getPosition().x, enemy6.getsprite().getPosition().y + 12);
+		if (bullet6.getsprite().getPosition().y > 1000 && enemy6.isalive()) {
+			bullet6.setlocation(enemy6.getsprite().getPosition().x +30, enemy6.getsprite().getPosition().y + 30);
 		}
-		if (bullet7.getsprite().getPosition().y > 1000) {
-			bullet7.setlocation(enemy7.getsprite().getPosition().x, enemy7.getsprite().getPosition().y + 12);
+		if (bullet7.getsprite().getPosition().y > 1000 && enemy7.isalive()) {
+			bullet7.setlocation(enemy7.getsprite().getPosition().x +30, enemy7.getsprite().getPosition().y + 30);
 		}
 
 		bullet0.movedown();
@@ -295,26 +321,75 @@ int main()
 		bullet6.movedown();
 		bullet7.movedown();
 
+		if (!enemy0.isalive() || !enemy1.isalive() || !enemy2.isalive() || !enemy3.isalive()) {
+			enemyvoice.play();
+		}
+		if (!enemy4.isalive() || !enemy5.isalive() || !enemy6.isalive() || !enemy7.isalive()) {
+			enemyvoice.play();
+		}
+
 		//Shooting
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) {
+			shipgun.play();
 			Bullet newBullet = Bullet();
-			newBullet.setlocation(ship.getsprite().getPosition().x + 7, ship.getsprite().getPosition().y - 65);
+			newBullet.setlocation(ship.getsprite().getPosition().x + 42, ship.getsprite().getPosition().y - 48);
 			Bullets.push_back(newBullet);
 		}
-		
 		for (int i = 0; i < Bullets.size(); i++) {
 			Bullets.at(i).setTexture();
 			Bullets.at(i).moveup();
-			Bullets.at(i).draw(window);
+			Bullets.at(i).draw(window);		
 		}
-
-		if (bullet.getalive()) {
-			bullet.setlocation(ship.getsprite().getPosition().x + 7, ship.getsprite().getPosition().y - 65);
-			bullet.draw(window);
-			bullet.moveup();
+		if (Score==0) {
+			backtexture.loadFromFile("win.jpg");
+			sf::Sprite backsprite;
+			backsprite.setTexture(backtexture);
+			ship.kill();
+			enemy0.kill();
+			enemy1.kill();
+			enemy2.kill();
+			enemy3.kill();
+			enemy4.kill();
+			enemy5.kill();
+			enemy6.kill();
+			enemy7.kill();
+			bullet0.kill();
+			bullet1.kill();
+			bullet2.kill();
+			bullet3.kill();
+			bullet4.kill();
+			bullet5.kill();
+			bullet6.kill();
+			bullet7.kill();
+			for (int i = 0; i < Bullets.size(); i++) {
+				Bullets.at(i).kill();
+			}
 		}
-
-		//Collision
+		if (Save == 0) {
+			backtexture.loadFromFile("youlose.jpg");
+			sf::Sprite backsprite;
+			backsprite.setTexture(backtexture);
+			ship.kill();
+			enemy0.kill();
+			enemy1.kill();
+			enemy2.kill();
+			enemy3.kill();
+			enemy4.kill();
+			enemy5.kill();
+			enemy6.kill();
+			enemy7.kill();
+			bullet0.kill();
+			bullet1.kill();
+			bullet2.kill();
+			bullet3.kill();
+			bullet4.kill();
+			bullet5.kill();
+			bullet6.kill();
+			bullet7.kill();
+			for (int i = 0; i < Bullets.size(); i++) {
+				Bullets.at(i).kill();
+			}
+		}
 
 		window.display();
 	}
